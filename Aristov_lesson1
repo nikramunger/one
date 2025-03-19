@@ -2,13 +2,32 @@
 
 Тайские перевозки: 
 
-wget https://storage.googleapis.com/thaibus/thai_medium.tar.gz && tar -xf thai_medium.tar.gz && psql < thai.sql
+postgres@ivan-psql-3:~$ wget https://storage.googleapis.com/thaibus/thai_small.tar.gz && tar -xf thai_small.tar.gz && psql < thai.sql^C
+postgres@ivan-psql-3:~$ psql
+psql (14.13 (Debian 14.13-1.pgdg110+1))
+Введите "help", чтобы получить справку.
 
-postgres=# \c thai
+postgres=# \c thai 
+Вы подключены к базе данных "thai" как пользователь "postgres".
+thai=# \dt book.*
+             Список отношений
+ Схема |     Имя      |   Тип   | Владелец 
+-------+--------------+---------+----------
+ book  | bus          | таблица | postgres
+ book  | busroute     | таблица | postgres
+ book  | busstation   | таблица | postgres
+ book  | fam          | таблица | postgres
+ book  | nam          | таблица | postgres
+ book  | ride         | таблица | postgres
+ book  | schedule     | таблица | postgres
+ book  | seat         | таблица | postgres
+ book  | seatcategory | таблица | postgres
+ book  | tickets      | таблица | postgres
+(10 строк)
 
-You are now connected to database "thai" as user "postgres".
-
-thai=#  select count(*) from book.tickets;
+thai=# select count(*) from book.ride;
  count  
 --------
  144000
+(1 строка)
+
