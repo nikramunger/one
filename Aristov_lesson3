@@ -1,0 +1,625 @@
+shulcev=# select * from pg_settings where name like 'auto%'\gx
+-[ RECORD 1 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_analyze
+setting         | on
+unit            | 
+category        | Customized Options
+short_desc      | Use EXPLAIN ANALYZE for plan logging.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 8
+pending_restart | f
+-[ RECORD 2 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_buffers
+setting         | on
+unit            | 
+category        | Customized Options
+short_desc      | Log buffers usage.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 9
+pending_restart | f
+-[ RECORD 3 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_format
+setting         | text
+unit            | 
+category        | Customized Options
+short_desc      | EXPLAIN format to be used for plan logging.
+extra_desc      | 
+context         | superuser
+vartype         | enum
+source          | default
+min_val         | 
+max_val         | 
+enumvals        | {text,xml,json,yaml}
+boot_val        | text
+reset_val       | text
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 4 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_level
+setting         | log
+unit            | 
+category        | Customized Options
+short_desc      | Log level for the plan.
+extra_desc      | 
+context         | superuser
+vartype         | enum
+source          | default
+min_val         | 
+max_val         | 
+enumvals        | {debug5,debug4,debug3,debug2,debug1,info,notice,warning,log}
+boot_val        | log
+reset_val       | log
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 5 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_min_duration
+setting         | 10000
+unit            | ms
+category        | Customized Options
+short_desc      | Sets the minimum execution time above which plans will be logged.
+extra_desc      | Zero prints all plans. -1 turns this feature off.
+context         | superuser
+vartype         | integer
+source          | configuration file
+min_val         | -1
+max_val         | 2147483647
+enumvals        | 
+boot_val        | -1
+reset_val       | 10000
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 10
+pending_restart | f
+-[ RECORD 6 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_nested_statements
+setting         | on
+unit            | 
+category        | Customized Options
+short_desc      | Log nested statements.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 11
+pending_restart | f
+-[ RECORD 7 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_settings
+setting         | off
+unit            | 
+category        | Customized Options
+short_desc      | Log modified configuration parameters affecting query planning.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | default
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | off
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 8 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_timing
+setting         | off
+unit            | 
+category        | Customized Options
+short_desc      | Collect timing data, not just row counts.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | on
+reset_val       | off
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 12
+pending_restart | f
+-[ RECORD 9 ]---+------------------------------------------------------------------------------------------
+name            | auto_explain.log_triggers
+setting         | on
+unit            | 
+category        | Customized Options
+short_desc      | Include trigger statistics in plans.
+extra_desc      | This has no effect unless log_analyze is also set.
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 13
+pending_restart | f
+-[ RECORD 10 ]--+------------------------------------------------------------------------------------------
+name            | auto_explain.log_verbose
+setting         | on
+unit            | 
+category        | Customized Options
+short_desc      | Use EXPLAIN VERBOSE for plan logging.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 14
+pending_restart | f
+-[ RECORD 11 ]--+------------------------------------------------------------------------------------------
+name            | auto_explain.log_wal
+setting         | off
+unit            | 
+category        | Customized Options
+short_desc      | Log WAL usage.
+extra_desc      | 
+context         | superuser
+vartype         | bool
+source          | default
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | off
+reset_val       | off
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 12 ]--+------------------------------------------------------------------------------------------
+name            | auto_explain.sample_rate
+setting         | 1
+unit            | 
+category        | Customized Options
+short_desc      | Fraction of queries to process.
+extra_desc      | 
+context         | superuser
+vartype         | real
+source          | default
+min_val         | 0
+max_val         | 1
+enumvals        | 
+boot_val        | 1
+reset_val       | 1
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 13 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum
+setting         | on
+unit            | 
+category        | Autovacuum
+short_desc      | Starts the autovacuum subprocess.
+extra_desc      | 
+context         | sighup
+vartype         | bool
+source          | configuration file
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | on
+reset_val       | on
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 15
+pending_restart | f
+-[ RECORD 14 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_analyze_scale_factor
+setting         | 0.05
+unit            | 
+category        | Autovacuum
+short_desc      | Number of tuple inserts, updates, or deletes prior to analyze as a fraction of reltuples.
+extra_desc      | 
+context         | sighup
+vartype         | real
+source          | configuration file
+min_val         | 0
+max_val         | 100
+enumvals        | 
+boot_val        | 0.1
+reset_val       | 0.05
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 16
+pending_restart | f
+-[ RECORD 15 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_analyze_threshold
+setting         | 50
+unit            | 
+category        | Autovacuum
+short_desc      | Minimum number of tuple inserts, updates, or deletes prior to analyze.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | configuration file
+min_val         | 0
+max_val         | 2147483647
+enumvals        | 
+boot_val        | 50
+reset_val       | 50
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 17
+pending_restart | f
+-[ RECORD 16 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_freeze_max_age
+setting         | 200000000
+unit            | 
+category        | Autovacuum
+short_desc      | Age at which to autovacuum a table to prevent transaction ID wraparound.
+extra_desc      | 
+context         | postmaster
+vartype         | integer
+source          | default
+min_val         | 100000
+max_val         | 2000000000
+enumvals        | 
+boot_val        | 200000000
+reset_val       | 200000000
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 17 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_max_workers
+setting         | 1
+unit            | 
+category        | Autovacuum
+short_desc      | Sets the maximum number of simultaneously running autovacuum worker processes.
+extra_desc      | 
+context         | postmaster
+vartype         | integer
+source          | configuration file
+min_val         | 1
+max_val         | 262143
+enumvals        | 
+boot_val        | 3
+reset_val       | 1
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 18
+pending_restart | f
+-[ RECORD 18 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_multixact_freeze_max_age
+setting         | 400000000
+unit            | 
+category        | Autovacuum
+short_desc      | Multixact age at which to autovacuum a table to prevent multixact wraparound.
+extra_desc      | 
+context         | postmaster
+vartype         | integer
+source          | default
+min_val         | 10000
+max_val         | 2000000000
+enumvals        | 
+boot_val        | 400000000
+reset_val       | 400000000
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 19 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_naptime
+setting         | 1
+unit            | s
+category        | Autovacuum
+short_desc      | Time to sleep between autovacuum runs.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | configuration file
+min_val         | 1
+max_val         | 2147483
+enumvals        | 
+boot_val        | 60
+reset_val       | 1
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 19
+pending_restart | f
+-[ RECORD 20 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_cost_delay
+setting         | 5
+unit            | ms
+category        | Autovacuum
+short_desc      | Vacuum cost delay in milliseconds, for autovacuum.
+extra_desc      | 
+context         | sighup
+vartype         | real
+source          | configuration file
+min_val         | -1
+max_val         | 100
+enumvals        | 
+boot_val        | 2
+reset_val       | 5
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 20
+pending_restart | f
+-[ RECORD 21 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_cost_limit
+setting         | 400
+unit            | 
+category        | Autovacuum
+short_desc      | Vacuum cost amount available before napping, for autovacuum.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | configuration file
+min_val         | -1
+max_val         | 10000
+enumvals        | 
+boot_val        | -1
+reset_val       | 400
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 21
+pending_restart | f
+-[ RECORD 22 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_insert_scale_factor
+setting         | 0.2
+unit            | 
+category        | Autovacuum
+short_desc      | Number of tuple inserts prior to vacuum as a fraction of reltuples.
+extra_desc      | 
+context         | sighup
+vartype         | real
+source          | default
+min_val         | 0
+max_val         | 100
+enumvals        | 
+boot_val        | 0.2
+reset_val       | 0.2
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 23 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_insert_threshold
+setting         | 1000
+unit            | 
+category        | Autovacuum
+short_desc      | Minimum number of tuple inserts prior to vacuum, or -1 to disable insert vacuums.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | default
+min_val         | -1
+max_val         | 2147483647
+enumvals        | 
+boot_val        | 1000
+reset_val       | 1000
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+-[ RECORD 24 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_scale_factor
+setting         | 0.05
+unit            | 
+category        | Autovacuum
+short_desc      | Number of tuple updates or deletes prior to vacuum as a fraction of reltuples.
+extra_desc      | 
+context         | sighup
+vartype         | real
+source          | configuration file
+min_val         | 0
+max_val         | 100
+enumvals        | 
+boot_val        | 0.2
+reset_val       | 0.05
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 22
+pending_restart | f
+-[ RECORD 25 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_vacuum_threshold
+setting         | 50
+unit            | 
+category        | Autovacuum
+short_desc      | Minimum number of tuple updates or deletes prior to vacuum.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | configuration file
+min_val         | 0
+max_val         | 2147483647
+enumvals        | 
+boot_val        | 50
+reset_val       | 50
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 23
+pending_restart | f
+-[ RECORD 26 ]--+------------------------------------------------------------------------------------------
+name            | autovacuum_work_mem
+setting         | 249856
+unit            | kB
+category        | Resource Usage / Memory
+short_desc      | Sets the maximum memory to be used by each autovacuum worker process.
+extra_desc      | 
+context         | sighup
+vartype         | integer
+source          | configuration file
+min_val         | -1
+max_val         | 2147483647
+enumvals        | 
+boot_val        | -1
+reset_val       | 249856
+sourcefile      | /etc/postgresql/14/main/postgresql.conf
+sourceline      | 24
+pending_restart | f
+
+shulcev=# \timing
+Секундомер включён.
+shulcev=# CREATE TABLE test(i text);
+CREATE TABLE
+Время: 762,577 мс
+shulcev=# INSERT INTO test SELECT s.id FROM generate_series(1,1000000) AS s(id);
+INSERT 0 1000000
+Время: 14178,913 мс (00:14,179)
+shulcev=# \dt+ test
+                                  Список отношений
+ Схема  | Имя  |   Тип   | Владелец |  Хранение  | Метод доступа | Размер | Описание 
+--------+------+---------+----------+------------+---------------+--------+----------
+ public | test | таблица | postgres | постоянное | heap          | 35 MB  | 
+(1 строка)
+
+shulcev=# SELECT
+n.nspname || '.' || c.relname AS table_name,
+pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size,
+pg_size_pretty(pg_total_relation_size(c.reltoastrelid)) AS toast_size
+FROM pg_class c
+JOIN pg_namespace n
+ON c.relnamespace = n.oid
+WHERE
+relname = 'test';
+ table_name  | total_size | toast_size 
+-------------+------------+------------
+ public.test | 35 MB      | 8192 bytes
+(1 строка)
+
+Время: 2,763 мс
+shulcev=# UPDATE test SET i = i || 'a';
+UPDATE test SET i = i || 'b';
+UPDATE test SET i = i || 'c';
+UPDATE test SET i = i || 'd';
+UPDATE test SET i = i || 'e';
+UPDATE 1000000
+Время: 28715,908 мс (00:28,716)
+UPDATE 1000000
+Время: 28764,903 мс (00:28,765)
+UPDATE 1000000
+Время: 76382,528 мс (01:16,383)
+UPDATE 1000000
+Время: 26458,254 мс (00:26,458)
+UPDATE 1000000
+Время: 24443,518 мс (00:24,444)
+shulcev=# \dt+ test                    
+                                  Список отношений
+ Схема  | Имя  |   Тип   | Владелец |  Хранение  | Метод доступа | Размер | Описание 
+--------+------+---------+----------+------------+---------------+--------+----------
+ public | test | таблица | postgres | постоянное | heap          | 106 MB | 
+(1 строка)
+
+shulcev=# SELECT relname, n_live_tup, n_dead_tup,
+trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
+FROM pg_stat_user_tables WHERE relname = 'test';
+ relname | n_live_tup | n_dead_tup | ratio% |        last_autovacuum        
+---------+------------+------------+--------+-------------------------------
+ test    |    1000000 |          0 |      0 | 2025-03-25 16:53:54.457548+03
+(1 строка)
+
+Время: 17,377 мс
+shulcev=# UPDATE test SET i = i || 'a';
+UPDATE test SET i = i || 'b';
+UPDATE test SET i = i || 'c';
+UPDATE test SET i = i || 'd';
+UPDATE test SET i = i || 'e';
+UPDATE 1000000
+Время: 59374,440 мс (00:59,374)
+UPDATE 1000000
+Время: 24299,742 мс (00:24,300)
+UPDATE 1000000
+Время: 47520,406 мс (00:47,520)
+UPDATE 1000000
+Время: 67379,896 мс (01:07,380)
+UPDATE 1000000
+Время: 55981,218 мс (00:55,981)
+
+shulcev=# \dt+ test
+                                  Список отношений
+ Схема  | Имя  |   Тип   | Владелец |  Хранение  | Метод доступа | Размер | Описание 
+--------+------+---------+----------+------------+---------------+--------+----------
+ public | test | таблица | postgres | постоянное | heap          | 95 MB  | 
+
+shulcev=# SELECT relname, n_live_tup, n_dead_tup,
+trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
+FROM pg_stat_user_tables WHERE relname = 'test';
+ relname | n_live_tup | n_dead_tup | ratio% |        last_autovacuum        
+---------+------------+------------+--------+-------------------------------
+ test    |    1000000 |          0 |      0 | 2025-03-25 17:03:07.047546+03
+
+
+shulcev=# UPDATE test SET i = i || 'a';
+UPDATE test SET i = i || 'b';
+UPDATE test SET i = i || 'c';
+UPDATE test SET i = i || 'd';
+UPDATE test SET i = i || 'e';
+
+UPDATE 1000000
+ERROR: wait: remote command exited without exit status or exit signal
+
+shulcev=# \dt+ test
+                                  Список отношений
+ Схема  | Имя  |   Тип   | Владелец |  Хранение  | Метод доступа | Размер | Описание 
+--------+------+---------+----------+------------+---------------+--------+----------
+ public | test | таблица | postgres | постоянное | heap          | 119 MB | 
+(1 строка)
+
+shulcev=# SELECT relname, n_live_tup, n_dead_tup,
+trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
+FROM pg_stat_user_tables WHERE relname = 'test';
+ relname | n_live_tup | n_dead_tup | ratio% |       last_autovacuum        
+---------+------------+------------+--------+------------------------------
+ test    |    1000000 |          0 |      0 | 2025-03-25 17:25:31.89744+03
+
+shulcev=# ALTER TABLE test SET (autovacuum_enabled = off);
+ALTER TABLE
+Время: 5,503 мс
+hulcev=# UPDATE test SET i = i || 'a';
+UPDATE test SET i = i || 'b';
+UPDATE test SET i = i || 'c';
+UPDATE test SET i = i || 'd';
+UPDATE test SET i = i || 'e';
+UPDATE test SET i = i || 'a';
+UPDATE test SET i = i || 'b';
+UPDATE test SET i = i || 'c';
+UPDATE test SET i = i || 'd';
+UPDATE test SET i = i || 'e';
+UPDATE 1000000
+Время: 2251,316 мс (00:02,251)
+UPDATE 1000000
+Время: 1621,227 мс (00:01,621)
+UPDATE 1000000
+Время: 1655,233 мс (00:01,655)
+UPDATE 1000000
+Время: 2676,470 мс (00:02,676)
+UPDATE 1000000
+Время: 2247,893 мс (00:02,248)
+UPDATE 1000000
+Время: 3412,836 мс (00:03,413)
+UPDATE 1000000
+Время: 2469,814 мс (00:02,470)
+UPDATE 1000000
+Время: 2320,186 мс (00:02,320)
+UPDATE 1000000
+Время: 3131,850 мс (00:03,132)
+UPDATE 1000000
+Время: 3663,569 мс (00:03,664)
+
+shulcev=# \dt+ test 
+                                  Список отношений
+ Схема  | Имя  |   Тип   | Владелец |  Хранение  | Метод доступа | Размер | Описание 
+--------+------+---------+----------+------------+---------------+--------+----------
+ public | test | таблица | postgres | постоянное | heap          | 940 MB | 
+
+
