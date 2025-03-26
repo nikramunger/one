@@ -1,0 +1,82 @@
+postgres@ivan-psql-3:~$ pgbench -i shulcev -p 6432
+postgres@ivan-psql-3:~$ cat /etc/pgbouncer/pgbouncer.ini 
+[databases]
+ivan = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=session
+
+shulcev = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=session
+
+* = host=127.0.0.1 port=5432
+
+[pgbouncer]
+...
+root@ivan-psql-3:~# systemctl reload pgbouncer.service
+
+postgres@ivan-psql-3:~$ pgbench  shulcev -p 6432 -S
+pgbench (14.13 (Debian 14.13-1.pgdg110+1))
+starting vacuum...end.
+transaction type: <builtin: select only>
+scaling factor: 1
+query mode: simple
+number of clients: 1
+number of threads: 1
+number of transactions per client: 10
+number of transactions actually processed: 10/10
+latency average = 0.281 ms
+initial connection time = 0.235 ms
+tps = 3554.923569 (without initial connection time)
+
+
+postgres@ivan-psql-3:~$ cat /etc/pgbouncer/pgbouncer.ini 
+[databases]
+ivan = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=session
+
+shulcev = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=transaction
+
+* = host=127.0.0.1 port=5432
+
+[pgbouncer]
+...
+
+root@ivan-psql-3:~# systemctl reload pgbouncer.service
+
+postgres@ivan-psql-3:~$ pgbench  shulcev -p 6432 -S
+pgbench (14.13 (Debian 14.13-1.pgdg110+1))
+starting vacuum...end.
+transaction type: <builtin: select only>
+scaling factor: 1
+query mode: simple
+number of clients: 1
+number of threads: 1
+number of transactions per client: 10
+number of transactions actually processed: 10/10
+latency average = 0.176 ms
+initial connection time = 0.219 ms
+tps = 5694.760820 (without initial connection time)
+
+postgres@ivan-psql-3:~$ cat /etc/pgbouncer/pgbouncer.ini 
+[databases]
+ivan = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=session
+
+shulcev = host=127.0.0.1 port=5432 dbname=ivan pool_size=20 pool_mode=statement
+
+* = host=127.0.0.1 port=5432
+
+[pgbouncer]
+...
+root@ivan-psql-3:~# systemctl reload pgbouncer.service
+
+postgres@ivan-psql-3:~$ pgbench  shulcev -p 6432 -S
+pgbench (14.13 (Debian 14.13-1.pgdg110+1))
+starting vacuum...end.
+transaction type: <builtin: select only>
+scaling factor: 1
+query mode: simple
+number of clients: 1
+number of threads: 1
+number of transactions per client: 10
+number of transactions actually processed: 10/10
+latency average = 0.220 ms
+initial connection time = 0.228 ms
+tps = 4545.454545 (without initial connection time)
+
+
