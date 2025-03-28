@@ -93,4 +93,87 @@ limit 10;
  Planning Time: 1.073 ms
  Execution Time: 1974.663 ms
 (48 строк)
+create index i_fkschedule on book.ride fkschedule;
+create index i_fkschedule on book.ride (fkschedule);
+create index i_fkroute on book.ride (fkroute);
+create index i_fkroute on book.schedule (fkroute);
+create index i_fkroute on book.busroute (fkbusstationfrom);
+create index i_fkbusstationfrom on book.busroute (fkbusstationfrom);
+create index i_fkride on book.tickets (fkride);
+create index i_fkbus on book.seat (fkbus);
 
+
+
+shulcev=# explain ANALYZE
+WITH all_place AS (
+    SELECT count(s.id) as all_place, s.fkbus as fkbus
+    FROM book.seat s
+    group by s.fkbus
+),
+order_place AS (
+    SELECT count(t.id) as order_place, t.fkride
+    FROM book.tickets t
+    group by t.fkride
+)
+SELECT r.id, r.startdate as depart_date, bs.city || ', ' || bs.name as busstation,  
+      t.order_place, st.all_place
+FROM book.ride r
+JOIN book.schedule as s
+      on r.fkschedule = s.id
+JOIN book.busroute br
+      on s.fkroute = br.id
+JOIN book.busstation bs
+      on br.fkbusstationfrom = bs.id
+JOIN order_place t
+      on t.fkride = r.id
+JOIN all_place st
+      on r.fkbus = st.fkbus
+GROUP BY r.id, r.startdate, bs.city || ', ' || bs.name, t.order_place,st.all_place
+ORDER BY r.startdate
+limit 10;
+                                                                                                     QUERY PLAN                                                                                                     
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=187965.18..187965.20 rows=10 width=56) (actual time=2290.327..2290.434 rows=10 loops=1)
+   ->  Sort  (cost=187965.18..188327.59 rows=144965 width=56) (actual time=2290.325..2290.431 rows=10 loops=1)
+         Sort Key: r.startdate
+         Sort Method: top-N heapsort  Memory: 26kB
+         ->  HashAggregate  (cost=179826.71..184832.53 rows=144965 width=56) (actual time=2213.062..2267.898 rows=144000 loops=1)
+               Group Key: r.id, ((bs.city || ', '::text) || bs.name), (count(t.id)), (count(s_1.id))
+               Planned Partitions: 32  Batches: 33  Memory Usage: 1049kB  Disk Usage: 14160kB
+               ->  Hash Join  (cost=1053.00..172363.28 rows=144965 width=56) (actual time=5.463..2126.062 rows=144000 loops=1)
+                     Hash Cond: (r.fkbus = s_1.fkbus)
+                     ->  Hash Join  (cost=1047.84..170930.21 rows=144965 width=36) (actual time=5.356..2070.881 rows=144000 loops=1)
+                           Hash Cond: (br.fkbusstationfrom = bs.id)
+                           ->  Hash Join  (cost=1046.61..170387.18 rows=144965 width=24) (actual time=5.323..2039.360 rows=144000 loops=1)
+                                 Hash Cond: (s.fkroute = br.id)
+                                 ->  Hash Join  (cost=1044.26..169977.42 rows=144965 width=24) (actual time=5.276..2006.981 rows=144000 loops=1)
+                                       Hash Cond: (r.fkschedule = s.id)
+                                       ->  Merge Join  (cost=1000.86..169552.37 rows=144965 width=24) (actual time=4.835..1964.734 rows=144000 loops=1)
+                                             Merge Cond: (r.id = t.fkride)
+                                             ->  Index Scan using ride_pkey on ride r  (cost=0.42..3375.60 rows=143885 width=16) (actual time=0.120..39.989 rows=144000 loops=1)
+                                             ->  Finalize GroupAggregate  (cost=1000.44..162555.35 rows=144965 width=12) (actual time=4.710..1880.798 rows=144000 loops=1)
+                                                   Group Key: t.fkride
+                                                   ->  Gather Merge  (cost=1000.44..160380.87 rows=144965 width=12) (actual time=4.556..1834.371 rows=144000 loops=1)
+                                                         Workers Planned: 1
+                                                         Workers Launched: 1
+                                                         ->  Partial GroupAggregate  (cost=0.43..143072.30 rows=144965 width=12) (actual time=0.138..1587.634 rows=72000 loops=2)
+                                                               Group Key: t.fkride
+                                                               ->  Parallel Index Scan using i_fkride on tickets t  (cost=0.43..126371.38 rows=3050254 width=12) (actual time=0.045..1328.091 rows=2592752 loops=2)
+                                       ->  Hash  (cost=25.40..25.40 rows=1440 width=8) (actual time=0.423..0.425 rows=1440 loops=1)
+                                             Buckets: 2048  Batches: 1  Memory Usage: 73kB
+                                             ->  Seq Scan on schedule s  (cost=0.00..25.40 rows=1440 width=8) (actual time=0.015..0.243 rows=1440 loops=1)
+                                 ->  Hash  (cost=1.60..1.60 rows=60 width=8) (actual time=0.032..0.033 rows=60 loops=1)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                       ->  Seq Scan on busroute br  (cost=0.00..1.60 rows=60 width=8) (actual time=0.017..0.022 rows=60 loops=1)
+                           ->  Hash  (cost=1.10..1.10 rows=10 width=20) (actual time=0.018..0.018 rows=10 loops=1)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 ->  Seq Scan on busstation bs  (cost=0.00..1.10 rows=10 width=20) (actual time=0.012..0.013 rows=10 loops=1)
+                     ->  Hash  (cost=5.10..5.10 rows=5 width=12) (actual time=0.093..0.095 rows=5 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           ->  HashAggregate  (cost=5.00..5.05 rows=5 width=12) (actual time=0.089..0.091 rows=5 loops=1)
+                                 Group Key: s_1.fkbus
+                                 Batches: 1  Memory Usage: 24kB
+                                 ->  Seq Scan on seat s_1  (cost=0.00..4.00 rows=200 width=8) (actual time=0.032..0.055 rows=200 loops=1)
+ Planning Time: 2.491 ms
+ Execution Time: 2292.986 ms
+(43 строки)
