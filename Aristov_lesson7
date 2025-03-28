@@ -93,6 +93,7 @@ limit 10;
  Planning Time: 1.073 ms
  Execution Time: 1974.663 ms
 (48 строк)
+Создаем индексы.
 create index i_fkschedule on book.ride fkschedule;
 create index i_fkschedule on book.ride (fkschedule);
 create index i_fkroute on book.ride (fkroute);
