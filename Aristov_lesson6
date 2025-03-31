@@ -1,0 +1,27 @@
+Я заранее прошу прощения за такое дз. Не успеваю сделать нормально эту задачу. Поэтому просто пишу алгоритм действий(
+1)Создаем пользователя для репликации 
+createuser --replication -P repluser
+2)Редактируем pg_hba.conf
+3)Настройки мастера в postgresql.conf готовы для потоковой репликации(вроде:)) 
+4)создаем директорию рядом с мастером
+sudo -u postgres mkdir -p /var/lib/postgresql/14/main_replica
+5)Запускаем 
+sudo -u postgres -с "pg_basebackup -h 127.0.0.1 --username=repluser --pgdata=/var/lib/pgsql/10/data --wal-method=stream --write-recovery-conf"
+6)Меняем в postgresql.conf у реплтке порт 
+port = 6433
+7)Стартуем реплику
+
+* Для включения синхронной реплике надо
+На мастере установить 
+synchronous_standby_names = 'pgsql_0_node_0'
+synchronous_commit = on
+На реплике
+standby_mode = 'on'
+
+primary_conninfo = 'application_name=pgsql_0_node_0 host=IP_PRIMARY_NODE port=5432 user=replication_user password=PASSWORD'
+
+recovery_target_timeline = 'latest'
+
+trigger_file = '/tmp/failover_5432.trigger'
+
+Перезагружаем сервисы.
