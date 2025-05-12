@@ -1,0 +1,64 @@
+CREATE TABLE sales (
+    sale_id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    customer_id INTEGER NOT NULL,
+    sale_date DATE NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    total_amount DECIMAL(12, 2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
+    region VARCHAR(50),
+    payment_method VARCHAR(20),
+    discount DECIMAL(5, 2) DEFAULT 0
+);
+
+INSERT INTO sales (product_id, customer_id, sale_date, quantity, unit_price, region, payment_method, discount)
+SELECT 
+    (random() * 10)::integer + 100,
+    (random() * 10)::integer + 1000,
+    CURRENT_DATE - (random() * 365)::integer,
+    (random() * 5)::integer + 1,
+    (random() * 300 + 10)::numeric(10,2),
+    CASE (random() * 3)::integer 
+        WHEN 0 THEN 'North' 
+        WHEN 1 THEN 'South' 
+        WHEN 2 THEN 'East' 
+        ELSE 'West' 
+    END,
+    CASE (random() * 3)::integer 
+        WHEN 0 THEN 'Credit Card' 
+        WHEN 1 THEN 'PayPal' 
+        WHEN 2 THEN 'Cash' 
+        ELSE 'Debit Card' 
+    END,
+    CASE WHEN random() > 0.7 THEN (random() * 15)::numeric(5,2) ELSE 0 END
+FROM generate_series(1, 1000);
+
+SELECT * FROM sales LIMIT 10;
+SELECT COUNT(*) FROM sales;
+
+
+CREATE OR REPLACE FUNCTION get_year_third(sale_date DATE) 
+RETURNS INTEGER AS $$
+BEGIN
+    -- Проверка на NULL
+    IF sale_date IS NULL THEN
+        RETURN NULL;
+    END IF;
+    
+    RETURN ((EXTRACT(MONTH FROM sale_date) - 1) / 4)::INTEGER + 1;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+SELECT 
+    sale_id,
+    sale_date,
+    get_year_third(sale_date) AS year_third,
+    CASE get_year_third(sale_date)
+        WHEN 1 THEN 'Первая треть (январь-апрель)'
+        WHEN 2 THEN 'Вторая треть (май-август)'
+        WHEN 3 THEN 'Третья треть (сентябрь-декабрь)'
+        ELSE 'Дата не указана'
+    END AS year_third_name
+FROM sales
+ORDER BY sale_date NULLS FIRST
+LIMIT 10;
