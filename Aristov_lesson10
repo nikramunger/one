@@ -1,0 +1,170 @@
+1. Сгенерировать таблицу с 1 млн JSONB документов
+sql
+
+-- Создаем таблицу для хранения JSONB документов
+CREATE TABLE jsonb_documents (
+    id SERIAL PRIMARY KEY,
+    doc JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Заполняем таблицу 1 миллионом JSONB документов
+-- Каждый документ содержит случайные данные
+INSERT INTO jsonb_documents (doc)
+SELECT jsonb_build_object(
+    'user_id', id,
+    'name', 'User ' || id,
+    'email', 'user' || id || '@example.com',
+    'age', floor(random() * 70 + 18)::int,
+    'is_active', (random() > 0.5),
+    'address', jsonb_build_object(
+        'street', 'Street ' || (random() * 1000)::int,
+        'city', CASE WHEN random() > 0.5 THEN 'Moscow' ELSE 'Saint Petersburg' END,
+        'zip', (100000 + random() * 900000)::int
+    ),
+    'orders', (SELECT jsonb_agg(jsonb_build_object(
+        'order_id', n,
+        'amount', (random() * 1000)::numeric(10,2),
+        'items', floor(random() * 10 + 1)::int
+    )) FROM generate_series(1, floor(random() * 5 + 1)::int) AS n)
+)
+FROM generate_series(1, 1000000) AS id;
+
+-- Проверяем количество записей
+SELECT COUNT(*) FROM jsonb_documents;
+
+2. Создать индекс
+sql
+
+-- Создаем GIN индекс для эффективного поиска по JSONB полю
+CREATE INDEX idx_doc_gin ON jsonb_documents USING GIN (doc jsonb_path_ops);
+
+-- Также создадим индекс по конкретному полю внутри JSONB
+CREATE INDEX idx_doc_user_id ON jsonb_documents ((doc->>'user_id'));
+
+-- Проверяем индексы
+SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'jsonb_documents';
+
+3. Обновить 1 из полей в json
+sql
+
+-- Обновляем поле 'name' для документов с четными ID
+UPDATE jsonb_documents
+SET doc = jsonb_set(doc, '{name}', '"Updated User " || id', false)
+WHERE id % 2 = 0;
+
+-- Проверяем обновленные данные
+SELECT doc->>'name' FROM jsonb_documents WHERE id = 2;
+
+4. Убедиться в блоатинге TOAST
+sql
+
+-- Проверяем размер таблицы и TOAST
+SELECT 
+    pg_size_pretty(pg_total_relation_size('jsonb_documents')) AS total_size,
+    pg_size_pretty(pg_table_size('jsonb_documents')) AS table_size,
+    pg_size_pretty(pg_indexes_size('jsonb_documents')) AS indexes_size,
+    pg_size_pretty(pg_total_relation_size('jsonb_documents') - pg_table_size('jsonb_documents') - pg_indexes_size('jsonb_documents')) AS toast_size;
+
+-- Проверяем TOAST статистику для таблицы
+SELECT 
+    relname,
+    reltoastrelid,
+    pg_size_pretty(pg_relation_size(reltoastrelid)) AS toast_size
+FROM pg_class
+WHERE relname = 'jsonb_documents';
+
+-- Анализируем распределение размеров документов
+SELECT 
+    width_bucket(length(doc::text), 0, 10000, 10) AS bucket,
+    count(*) AS count,
+    min(length(doc::text)) AS min_size,
+    max(length(doc::text)) AS max_size
+FROM jsonb_documents
+GROUP BY bucket
+ORDER BY bucket;
+
+5. Придумать метод избавиться от TOAST и проверить на практике
+
+Один из способов уменьшить TOAST - нормализовать данные, вынеся часто используемые поля в отдельные колонки таблицы, а в JSONB оставить только редко используемые или переменные данные.
+sql
+
+-- Создаем новую нормализованную таблицу
+CREATE TABLE normalized_documents (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    age INT NOT NULL,
+    is_active BOOLEAN NOT NULL,
+    address_street TEXT,
+    address_city TEXT,
+    address_zip INT,
+    -- Остальные данные, которые не вошли в отдельные колонки, храним в JSONB
+    other_data JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Заполняем новую таблицу данными из старой
+INSERT INTO normalized_documents (
+    id, user_id, name, email, age, is_active,
+    address_street, address_city, address_zip,
+    other_data, created_at
+)
+SELECT 
+    id,
+    (doc->>'user_id')::int,
+    doc->>'name',
+    doc->>'email',
+    (doc->>'age')::int,
+    (doc->>'is_active')::boolean,
+    doc#>>'{address,street}',
+    doc#>>'{address,city}',
+    (doc#>>'{address,zip}')::int,
+    doc - 'user_id' - 'name' - 'email' - 'age' - 'is_active' - 'address',
+    created_at
+FROM jsonb_documents;
+
+-- Создаем индексы для новой таблицы
+CREATE INDEX idx_normalized_user_id ON normalized_documents (user_id);
+CREATE INDEX idx_normalized_email ON normalized_documents (email);
+CREATE INDEX idx_normalized_other_data_gin ON normalized_documents USING GIN (other_data jsonb_path_ops);
+
+-- Проверяем размеры таблиц
+SELECT 
+    'jsonb_documents' AS table_name,
+    pg_size_pretty(pg_total_relation_size('jsonb_documents')) AS total_size,
+    pg_size_pretty(pg_table_size('jsonb_documents')) AS table_size,
+    pg_size_pretty(pg_total_relation_size('jsonb_documents') - pg_table_size('jsonb_documents') - pg_indexes_size('jsonb_documents')) AS toast_size
+UNION ALL
+SELECT 
+    'normalized_documents' AS table_name,
+    pg_size_pretty(pg_total_relation_size('normalized_documents')) AS total_size,
+    pg_size_pretty(pg_table_size('normalized_documents')) AS table_size,
+    pg_size_pretty(pg_total_relation_size('normalized_documents') - pg_table_size('normalized_documents') - pg_indexes_size('normalized_documents')) AS toast_size;
+
+6. Учет блоатинга индексов
+
+При обновлении JSONB документов могут страдать и индексы. Важно следить за их состоянием:
+sql
+
+-- Проверяем размер индексов до и после обновлений
+SELECT 
+    indexname,
+    pg_size_pretty(pg_relation_size(indexname::regclass)) AS index_size
+FROM pg_indexes
+WHERE tablename IN ('jsonb_documents', 'normalized_documents');
+
+-- Перестраиваем индексы для оптимизации
+REINDEX INDEX idx_doc_gin;
+REINDEX INDEX idx_normalized_other_data_gin;
+
+-- Анализируем эффективность индексов
+EXPLAIN ANALYZE SELECT * FROM jsonb_documents WHERE doc @> '{"age": 30}';
+EXPLAIN ANALYZE SELECT * FROM normalized_documents WHERE age = 30;
+
+-- Для JSONB таблицы можно также рассмотреть частичные индексы
+-- или индексы на часто используемые пути
+CREATE INDEX idx_doc_age ON jsonb_documents ((doc->>'age'));
+
+Вывод: нормализация данных и вынос часто используемых полей в отдельные колонки позволяет значительно уменьшить TOAST и улучшить производительность запросов к этим полям, при этом сохраняя гибкость JSONB для редко используемых или переменных данных.
