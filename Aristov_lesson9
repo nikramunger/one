@@ -1,0 +1,66 @@
+#Создаем таблицу
+CREATE TABLE book.ride_summary (
+    id INT,
+    depart_date TIMESTAMP,
+    busstation TEXT,
+    zanyato INT
+);
+#Создаем функцию
+CREATE OR REPLACE FUNCTION insert_ride_summary(ride_id integer)
+RETURNS void AS $$
+BEGIN
+    INSERT INTO ride_summary (id, depart_date, busstation, zanyato)
+    WITH all_place AS (
+        SELECT count(s.id) as all_place, s.fkbus as fkbus
+        FROM book.seat s
+        GROUP BY s.fkbus
+    ),
+    order_place AS (
+        SELECT count(t.id) as order_place, t.fkride
+        FROM book.tickets t
+        GROUP BY t.fkride
+    )
+    SELECT  r.id, 
+            r.startdate as depart_date, 
+            bs.city || ', ' || bs.name as busstation,  
+            st.all_place - (st.all_place - t.order_place) as zanyato
+    FROM book.ride r
+    JOIN book.schedule as s
+          on r.fkschedule = s.id
+    JOIN book.busroute br
+          on s.fkroute = br.id
+    JOIN book.busstation bs
+          on br.fkbusstationfrom = bs.id
+    JOIN order_place t
+          on t.fkride = r.id
+    JOIN all_place st
+          on r.fkbus = st.fkbus
+    WHERE r.id = ride_id
+    GROUP BY r.id, r.startdate, bs.city || ', ' || bs.name, t.order_place, st.all_place;
+    
+    RAISE NOTICE 'Данные для рейса % успешно добавлены в таблицу ride_summary', ride_id;
+EXCEPTION
+    WHEN others THEN
+        RAISE EXCEPTION 'Ошибка при добавлении данных для рейса %: %', ride_id, SQLERRM;
+END;
+$$ LANGUAGE plpgsql;
+#Создаем тригер
+CREATE OR REPLACE FUNCTION trigger_update_ride_summary()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Вызываем нашу функцию для обновления данных в ride_summary
+    PERFORM insert_ride_summary(NEW.id);
+    
+    RETURN NEW;
+EXCEPTION
+    WHEN others THEN
+        RAISE WARNING 'Не удалось обновить ride_summary для рейса %: %', NEW.id, SQLERRM;
+        RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_ride_summary_update
+AFTER INSERT ON book.ride
+FOR EACH ROW
+EXECUTE FUNCTION trigger_update_ride_summary();
