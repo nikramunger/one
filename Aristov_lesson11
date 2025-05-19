@@ -1,0 +1,75 @@
+1. Текущие зарплаты сотрудников (последняя запись для каждого)
+WITH last_salaries AS (
+    SELECT 
+        e.id,
+        e.first_name,
+        e.last_name,
+        s.amount,
+        g.value AS grade,
+        s.from_date,
+        s.to_date,
+        ROW_NUMBER() OVER (PARTITION BY fk_employee ORDER BY from_date DESC) AS rn
+    FROM salary s
+    JOIN employee e ON s.fk_employee = e.id
+    JOIN grade g ON s.fk_grade = g.id
+)
+SELECT 
+    id, first_name, last_name, amount, grade, from_date, to_date
+FROM last_salaries
+WHERE rn = 1;
+2. История изменения зарплат с разницей от предыдущей
+SELECT 
+    e.first_name,
+    e.last_name,
+    s.amount,
+    g.value AS grade,
+    s.from_date,
+    s.to_date,
+    LAG(amount) OVER (PARTITION BY fk_employee ORDER BY from_date) AS prev_amount,
+    amount - LAG(amount) OVER (PARTITION BY fk_employee ORDER BY from_date) AS diff,
+    ROUND((amount - LAG(amount) OVER (PARTITION BY fk_employee ORDER BY from_date)) * 100.0 / 
+          NULLIF(LAG(amount) OVER (PARTITION BY fk_employee ORDER BY from_date), 0), 2) AS percent_change
+FROM salary s
+JOIN employee e ON s.fk_employee = e.id
+JOIN grade g ON s.fk_grade = g.id
+ORDER BY e.last_name, e.first_name, s.from_date;
+3. Сравнение зарплат сотрудников в рамках одного грейда
+SELECT 
+    e.first_name,
+    e.last_name,
+    g.value AS grade,
+    s.amount,
+    AVG(amount) OVER (PARTITION BY fk_grade) AS avg_grade_salary,
+    amount - AVG(amount) OVER (PARTITION BY fk_grade) AS diff_from_avg,
+    RANK() OVER (PARTITION BY fk_grade ORDER BY amount DESC) AS rank_in_grade
+FROM salary s
+JOIN employee e ON s.fk_employee = e.id
+JOIN grade g ON s.fk_grade = g.id
+WHERE CURRENT_DATE BETWEEN from_date AND to_date
+ORDER BY g.value, amount DESC;
+4. Накопительная сумма зарплат по сотрудникам
+SELECT 
+    e.first_name,
+    e.last_name,
+    s.from_date,
+    s.to_date,
+    s.amount,
+    SUM(amount) OVER (PARTITION BY fk_employee ORDER BY from_date 
+                      RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_sum
+FROM salary s
+JOIN employee e ON s.fk_employee = e.id
+ORDER BY e.last_name, e.first_name, s.from_date;
+5. Периоды работы на разных грейдах
+SELECT 
+    e.first_name,
+    e.last_name,
+    g.value AS grade,
+    s.from_date,
+    s.to_date,
+    LEAD(g.value) OVER (PARTITION BY fk_employee ORDER BY from_date) AS next_grade,
+    LEAD(from_date) OVER (PARTITION BY fk_employee ORDER BY from_date) AS next_grade_date,
+    (LEAD(from_date) OVER (PARTITION BY fk_employee ORDER BY from_date) - to_date) AS days_between_grades
+FROM salary s
+JOIN employee e ON s.fk_employee = e.id
+JOIN grade g ON s.fk_grade = g.id
+ORDER BY e.last_name, e.first_name, s.from_date;
